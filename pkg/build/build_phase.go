@@ -31,6 +31,10 @@ type BuildPhaseOptions struct {
 type BuildStagesOptions struct {
 	ImageBuildOptions container_runtime.BuildOptions
 	IntrospectOptions
+
+	VirtualMerge           bool
+	VirtualMergeFromCommit string
+	VirtualMergeIntoCommit string
 }
 
 type IntrospectOptions struct {
