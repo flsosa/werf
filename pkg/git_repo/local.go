@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/storer"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/storer"
 
 	"github.com/flant/logboek"
 
@@ -72,14 +72,6 @@ func (repo *Local) CheckIgnore(paths []string) (*check_ignore.Result, error) {
 	}
 
 	return check_ignore.CheckIgnore(repository, repo.Path, paths)
-}
-
-func (repo *Local) FindCommitIdByMessage(regex string) (string, error) {
-	head, err := repo.HeadCommit()
-	if err != nil {
-		return "", fmt.Errorf("error getting head commit: %s", err)
-	}
-	return repo.findCommitIdByMessage(repo.Path, regex, head)
 }
 
 func (repo *Local) IsEmpty() (bool, error) {

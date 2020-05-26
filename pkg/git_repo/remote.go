@@ -6,19 +6,18 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/flant/lockgate"
-	"github.com/flant/werf/pkg/werf"
-
-	"github.com/flant/werf/pkg/true_git"
+	"gopkg.in/ini.v1"
 
 	"github.com/flant/werf/pkg/slug"
+	"github.com/flant/werf/pkg/true_git"
+	"github.com/flant/werf/pkg/werf"
 
-	"gopkg.in/ini.v1"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/storer"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/storer"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 
+	"github.com/flant/lockgate"
 	"github.com/flant/logboek"
 )
 
@@ -42,14 +41,6 @@ func (repo *Remote) GetClonePath() string {
 
 func (repo *Remote) RemoteOriginUrl() (string, error) {
 	return repo.remoteOriginUrl(repo.GetClonePath())
-}
-
-func (repo *Remote) FindCommitIdByMessage(regex string) (string, error) {
-	head, err := repo.HeadCommit()
-	if err != nil {
-		return "", fmt.Errorf("error getting head commit: %s", err)
-	}
-	return repo.findCommitIdByMessage(repo.GetClonePath(), regex, head)
 }
 
 func (repo *Remote) IsEmpty() (bool, error) {

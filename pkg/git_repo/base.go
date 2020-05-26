@@ -6,21 +6,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"strings"
-
-	"gopkg.in/src-d/go-billy.v4/osfs"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/cache"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
-	"gopkg.in/src-d/go-git.v4/plumbing/storer"
-	"gopkg.in/src-d/go-git.v4/storage/filesystem"
 
 	"github.com/flant/logboek"
 	"github.com/flant/werf/pkg/git_repo/ls_tree"
 	"github.com/flant/werf/pkg/path_matcher"
 	"github.com/flant/werf/pkg/true_git"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 var (
@@ -57,51 +52,6 @@ func (repo *Base) remoteOriginUrl(repoPath string) (string, error) {
 
 	if originCfg, hasKey := cfg.Remotes["origin"]; hasKey {
 		return originCfg.URLs[0], nil
-	}
-
-	return "", nil
-}
-
-func (repo *Base) findCommitIdByMessage(repoPath string, regex string, headCommit string) (string, error) {
-	repository, err := git.PlainOpen(repoPath)
-	if err != nil {
-		return "", fmt.Errorf("cannot open repo `%s`: %s", repoPath, err)
-	}
-
-	headHash, err := newHash(headCommit)
-	if err != nil {
-		return "", fmt.Errorf("bad head commit hash `%s`: %s", headCommit, err)
-	}
-
-	commitObj, err := repository.CommitObject(headHash)
-	if err != nil {
-		return "", fmt.Errorf("cannot find head commit %s: %s", headCommit, err)
-	}
-
-	commitIter := object.NewCommitIterBSF(commitObj, nil, nil)
-
-	regexObj, err := regexp.Compile(regex)
-	if err != nil {
-		return "", fmt.Errorf("bad regex `%s`: %s", regex, err)
-	}
-
-	var foundCommit *object.Commit
-
-	err = commitIter.ForEach(func(c *object.Commit) error {
-		if c != nil && regexObj.Match([]byte(c.Message)) {
-			foundCommit = c
-			return storer.ErrStop
-		}
-
-		return nil
-	})
-
-	if err != nil && err != plumbing.ErrObjectNotFound {
-		return "", fmt.Errorf("failed to traverse repository: %s", err)
-	}
-
-	if foundCommit != nil {
-		return foundCommit.Hash.String(), nil
 	}
 
 	return "", nil
@@ -432,7 +382,7 @@ func (repo *Base) checksumWithLsTree(repoPath, gitDir, workTreeCacheDir string, 
 	}
 
 	err = true_git.WithWorkTree(gitDir, workTreeCacheDir, opts.Commit, true_git.WithWorkTreeOptions{HasSubmodules: hasSubmodules}, func(worktreeDir string) error {
-		repositoryWithPreparedWorktree, err := GitOpenWithCustomWorktreeDir(gitDir, worktreeDir)
+		repositoryWithPreparedWorktree, err := true_git.GitOpenWithCustomWorktreeDir(gitDir, worktreeDir)
 		if err != nil {
 			return err
 		}
@@ -501,10 +451,4 @@ func (repo *Base) checksumWithLsTree(repoPath, gitDir, workTreeCacheDir string, 
 	}
 
 	return checksum, nil
-}
-
-func GitOpenWithCustomWorktreeDir(gitDir string, worktreeDir string) (*git.Repository, error) {
-	worktreeFilesystem := osfs.New(worktreeDir)
-	storage := filesystem.NewStorage(osfs.New(gitDir), cache.NewObjectLRUDefault())
-	return git.Open(storage, worktreeFilesystem)
 }

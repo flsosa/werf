@@ -14,7 +14,7 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/bmatcuk/doublestar"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"gopkg.in/yaml.v2"
 
 	"github.com/flant/logboek"
