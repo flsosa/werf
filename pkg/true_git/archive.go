@@ -13,8 +13,8 @@ import (
 
 	"github.com/go-git/go-git/v5/plumbing/filemode"
 
-	"github.com/flant/werf/pkg/git_repo/ls_tree"
 	"github.com/flant/werf/pkg/path_matcher"
+	"github.com/flant/werf/pkg/true_git/ls_tree"
 	"github.com/flant/werf/pkg/util"
 )
 
@@ -130,7 +130,7 @@ func writeArchive(out io.Writer, gitDir, workTreeCacheDir string, withSubmodules
 
 	logProcessMsg := fmt.Sprintf("ls-tree (%s)", opts.PathMatcher.String())
 	logboek.Debug.LogProcessStart(logProcessMsg, logboek.LevelLogProcessStartOptions{})
-	result, err := ls_tree.LsTree(repository, opts.PathMatcher)
+	result, err := ls_tree.LsTree(repository, opts.Commit, opts.PathMatcher)
 	if err != nil {
 		logboek.Debug.LogProcessFail(logboek.LevelLogProcessFailOptions{})
 		return nil, err

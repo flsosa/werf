@@ -1,12 +1,14 @@
 package ls_tree
 
 import (
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/filemode"
 	"github.com/go-git/go-git/v5/plumbing/object"
 
@@ -15,18 +17,30 @@ import (
 	"github.com/flant/werf/pkg/path_matcher"
 )
 
-func LsTree(repository *git.Repository, pathMatcher path_matcher.PathMatcher) (*Result, error) {
-	ref, err := repository.Head()
+func newHash(s string) (plumbing.Hash, error) {
+	var h plumbing.Hash
+
+	b, err := hex.DecodeString(s)
+	if err != nil {
+		return h, err
+	}
+
+	copy(h[:], b)
+	return h, nil
+}
+
+func LsTree(repository *git.Repository, commit string, pathMatcher path_matcher.PathMatcher) (*Result, error) {
+	commitHash, err := newHash(commit)
+	if err != nil {
+		return nil, fmt.Errorf("invalid commit %q: %s", commit, err)
+	}
+
+	commitObj, err := repository.CommitObject(commitHash)
 	if err != nil {
 		return nil, err
 	}
 
-	commit, err := repository.CommitObject(ref.Hash())
-	if err != nil {
-		return nil, err
-	}
-
-	tree, err := commit.Tree()
+	tree, err := commitObj.Tree()
 	if err != nil {
 		return nil, err
 	}

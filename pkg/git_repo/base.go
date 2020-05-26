@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/flant/logboek"
-	"github.com/flant/werf/pkg/git_repo/ls_tree"
 	"github.com/flant/werf/pkg/path_matcher"
 	"github.com/flant/werf/pkg/true_git"
+	"github.com/flant/werf/pkg/true_git/ls_tree"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -400,7 +400,7 @@ func (repo *Base) checksumWithLsTree(repoPath, gitDir, workTreeCacheDir string, 
 			processMsg,
 			logboek.LevelLogProcessOptions{},
 			func() error {
-				mainLsTreeResult, err = ls_tree.LsTree(repositoryWithPreparedWorktree, pathMatcher)
+				mainLsTreeResult, err = ls_tree.LsTree(repositoryWithPreparedWorktree, opts.Commit, pathMatcher)
 				return err
 			},
 		); err != nil {
